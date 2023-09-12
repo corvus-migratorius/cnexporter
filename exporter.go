@@ -2,7 +2,7 @@ package main
 
 import (
 	"context"
-	"fmt"
+	// "fmt"
 	"log"
 	"net/http"
 	"time"
@@ -15,55 +15,62 @@ import (
 )
 
 var (
-	cntStats = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "test_stat",
-		Help: "This is a test Gauge metric",
+	// cntStats = promauto.NewGaugeVec(prometheus.GaugeOpts{
+	// 	Name: "test_stat",
+	// 	Help: "This is a test Gauge metric",
+	// },
+	// 	[]string{"id", "image", "name", "status", "state", "epoch"},
+	// )
+	cntCount = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "migratorius_exporter_containers_total",
+		Help: "Number of Docker containers detected on the node",
 	},
-		[]string{"id", "image", "name", "status", "state", "epoch"},
+		[]string{"nodename"},
 	)
 )
 
-func recordMetrics() {
+func recordMetrics(dclient *client.Client, dcontext context.Context) {
 	go func() {
 		for {
-			cntStats.With(prometheus.Labels{
-				"id":     "123",
-				"image":  "test",
-				"name":   "Test",
-				"status": "Created",
-				"state":  "created",
-				"epoch":   fmt.Sprint(time.Now().Unix()),
-			})
+			containers, err := dclient.ContainerList(dcontext, types.ContainerListOptions{All: true})
+			if err != nil {
+				panic(err)
+			}
+			cnt_total := float64(len(containers))
+			// cntStats.With(prometheus.Labels{
+			// 	"id":     "123",
+			// 	"image":  "test",
+			// 	"name":   "Test",
+			// 	"status": "Created",
+			// 	"state":  "created",
+			// 	"epoch":   fmt.Sprint(time.Now().Unix()),
+			// })
+			cntCount.With(prometheus.Labels{"nodename": "test"}).Set(cnt_total)
 			time.Sleep(15 * time.Second)
 		}
 	}()
 }
 
 func main() {
-	ctx := context.Background()
-	cli, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
+	dcontext := context.Background()
+	dclient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)
 	}
-	defer cli.Close()
+	defer dclient.Close()
 
-	containers, err := cli.ContainerList(ctx, types.ContainerListOptions{All: true})
-	if err != nil {
-		panic(err)
-	}
+	// for _, container := range containers {
+	// 	fmt.Printf(
+	// 		"%s : %s : %s : %s : %s\n",
+	// 		container.ID[:10],
+	// 		container.Image,
+	// 		container.Names[0],
+	// 		container.Status,
+	// 		container.State,
+	// 	)
+	// }
 
-	for _, container := range containers {
-		fmt.Printf(
-			"%s : %s : %s : %s : %s\n",
-			container.ID[:10],
-			container.Image,
-			container.Names[0],
-			container.Status,
-			container.State,
-		)
-	}
-
-	recordMetrics() // a coroutine
+	recordMetrics(dclient, dcontext) // a coroutine
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":2112", nil))
