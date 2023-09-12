@@ -3,9 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"net/http"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -31,4 +33,7 @@ func main() {
 				container.State,
 			)
 	}
+
+	http.Handle("/metrics", promhttp.Handler())
+    http.ListenAndServe(":2112", nil)
 }
