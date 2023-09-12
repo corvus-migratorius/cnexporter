@@ -15,15 +15,24 @@ import (
 )
 
 var (
-	cntStats = promauto.NewGauge(prometheus.GaugeOpts{
+	cntStats = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "test_stat",
 		Help: "This is a test Gauge metric",
-	})
+	},
+		[]string{"id", "image", "name", "status", "state"},
+	)
 )
 
 func recordMetrics() {
 	go func() {
-		cntStats.Set(0)
+		cntStats.With(prometheus.Labels{
+			"id":     "123",
+			"image":  "test",
+			"name":   "Test",
+			"status": "Created",
+			"state":  "created",
+		})
+
 		for {
 			time.Sleep(15 * time.Second)
 		}
@@ -54,7 +63,7 @@ func main() {
 		)
 	}
 
-	recordMetrics()  // a coroutine
+	recordMetrics() // a coroutine
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(":2112", nil))
