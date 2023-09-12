@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
 	"net/http"
 	"time"
 
@@ -56,5 +57,5 @@ func main() {
 	recordMetrics()  // a coroutine
 
 	http.Handle("/metrics", promhttp.Handler())
-	http.ListenAndServe(":2112", nil)
+	log.Fatal(http.ListenAndServe(":2112", nil))
 }
