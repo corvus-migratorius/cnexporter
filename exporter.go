@@ -19,21 +19,21 @@ var (
 		Name: "test_stat",
 		Help: "This is a test Gauge metric",
 	},
-		[]string{"id", "image", "name", "status", "state"},
+		[]string{"id", "image", "name", "status", "state", "epoch"},
 	)
 )
 
 func recordMetrics() {
 	go func() {
-		cntStats.With(prometheus.Labels{
-			"id":     "123",
-			"image":  "test",
-			"name":   "Test",
-			"status": "Created",
-			"state":  "created",
-		})
-
 		for {
+			cntStats.With(prometheus.Labels{
+				"id":     "123",
+				"image":  "test",
+				"name":   "Test",
+				"status": "Created",
+				"state":  "created",
+				"epoch":   fmt.Sprint(time.Now().Unix()),
+			})
 			time.Sleep(15 * time.Second)
 		}
 	}()
