@@ -48,6 +48,14 @@ var (
 	)
 )
 
+type CntLabels struct {
+	id 	string
+	image string
+	name string
+	status string
+	state string
+}
+
 func countByStatus(containers []types.Container, state string) int {
 	count := 0
 	for _, cnt := range containers {
@@ -56,6 +64,16 @@ func countByStatus(containers []types.Container, state string) int {
 		}
 	}
 	return count
+}
+
+func buildLabels(container types.Container) CntLabels {
+	return CntLabels{
+		container.ID,
+		container.Image,
+		strings.Trim(container.Names[0], "/"),
+		container.Status,
+		container.State,
+	}
 }
 
 func recordMetrics(dclient *client.Client, dcontext context.Context) {
@@ -78,12 +96,13 @@ func recordMetrics(dclient *client.Client, dcontext context.Context) {
 
 			cntStats.Reset()
 			for _, cnt := range containers {
+				labels := buildLabels(cnt)
 				cntStats.With(prometheus.Labels{
-					"id":       cnt.ID,
-					"image":    cnt.Image,
-					"name":     strings.Trim(cnt.Names[0], "/"),
-					"status":   cnt.Status,
-					"state":    cnt.State,
+					"id":       labels.id,
+					"image":    labels.image,
+					"name":     labels.name,
+					"status":   labels.status,
+					"state":    labels.state,
 					"nodename": hostname,
 				})
 			}
