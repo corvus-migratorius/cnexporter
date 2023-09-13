@@ -2,10 +2,10 @@ package main
 
 import (
 	"context"
-	// "fmt"
 	"log"
 	"net/http"
 	"os"
+	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -16,32 +16,32 @@ import (
 )
 
 var (
-	// cntStats = promauto.NewGaugeVec(prometheus.GaugeOpts{
-	// 	Name: "test_stat",
-	// 	Help: "This is a test Gauge metric",
-	// },
-	// 	[]string{"id", "image", "name", "status", "state", "epoch"},
-	// )
+	cntStats = promauto.NewGaugeVec(prometheus.GaugeOpts{
+		Name: "migratorius_docker_cnt_metadata",
+		Help: "Container metadata",
+	},
+		[]string{"id", "image", "name", "status", "state", "nodename"},
+	)
 	cntCountTotal = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_exporter_containers_total",
+		Name: "migratorius_docker_cnt_counts",
 		Help: "Number of Docker containers detected on the node",
 	},
 		[]string{"nodename"},
 	)
 	cntCountCreated = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_exporter_containers_created",
+		Name: "migratorius_docker_cnt_created",
 		Help: "Number of Docker containers with status 'created'",
 	},
 		[]string{"nodename"},
 	)
 	cntCountRunning = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_exporter_containers_running",
+		Name: "migratorius_docker_cnt_running",
 		Help: "Number of Docker containers with status 'running'",
 	},
 		[]string{"nodename"},
 	)
 	cntCountExited = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_exporter_containers_exited",
+		Name: "migratorius_docker_cnt_exited",
 		Help: "Number of Docker containers with status 'exited'",
 	},
 		[]string{"nodename"},
@@ -65,23 +65,29 @@ func recordMetrics(dclient *client.Client, dcontext context.Context) {
 			if err != nil {
 				panic(err)
 			}
+
+			hostname, err := os.Hostname()
+			if err != nil {
+				log.Fatal("Failed to read the hostname")
+			}
+
 			cnt_total := float64(len(containers))
 			cnt_created := float64(countByStatus(containers, "created"))
 			cnt_running := float64(countByStatus(containers, "running"))
 			cnt_exited := float64(countByStatus(containers, "exited"))
 
-			// cntStats.With(prometheus.Labels{
-			// 	"id":     "123",
-			// 	"image":  "test",
-			// 	"name":   "Test",
-			// 	"status": "Created",
-			// 	"state":  "created",
-			// 	"epoch":   fmt.Sprint(time.Now().Unix()),
-			// })
-			hostname, err := os.Hostname()
-			if err != nil {
-				log.Fatal("Failed to read the hostname")
+			cntStats.Reset()
+			for _, cnt := range containers {
+				cntStats.With(prometheus.Labels{
+					"id":       cnt.ID,
+					"image":    cnt.Image,
+					"name":     strings.Trim(cnt.Names[0], "/"),
+					"status":   cnt.Status,
+					"state":    cnt.State,
+					"nodename": hostname,
+				})
 			}
+
 			cntCountTotal.With(prometheus.Labels{"nodename": hostname}).Set(cnt_total)
 			cntCountCreated.With(prometheus.Labels{"nodename": hostname}).Set(cnt_created)
 			cntCountRunning.With(prometheus.Labels{"nodename": hostname}).Set(cnt_running)
