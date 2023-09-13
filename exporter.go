@@ -125,17 +125,6 @@ func main() {
 	}
 	defer dclient.Close()
 
-	// for _, container := range containers {
-	// 	fmt.Printf(
-	// 		"%s : %s : %s : %s : %s\n",
-	// 		container.ID[:10],
-	// 		container.Image,
-	// 		container.Names[0],
-	// 		container.Status,
-	// 		container.State,
-	// 	)
-	// }
-
 	recordMetrics(dclient, dcontext) // a coroutine
 
 	http.Handle("/metrics", promhttp.Handler())
