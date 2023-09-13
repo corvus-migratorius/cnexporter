@@ -5,6 +5,7 @@ import (
 	// "fmt"
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -77,10 +78,14 @@ func recordMetrics(dclient *client.Client, dcontext context.Context) {
 			// 	"state":  "created",
 			// 	"epoch":   fmt.Sprint(time.Now().Unix()),
 			// })
-			cntCountTotal.With(prometheus.Labels{"nodename": "test"}).Set(cnt_total)
-			cntCountCreated.With(prometheus.Labels{"nodename": "test"}).Set(cnt_created)
-			cntCountRunning.With(prometheus.Labels{"nodename": "test"}).Set(cnt_running)
-			cntCountExited.With(prometheus.Labels{"nodename": "test"}).Set(cnt_exited)
+			hostname, err := os.Hostname()
+			if err != nil {
+				log.Fatal("Failed to read the hostname")
+			}
+			cntCountTotal.With(prometheus.Labels{"nodename": hostname}).Set(cnt_total)
+			cntCountCreated.With(prometheus.Labels{"nodename": hostname}).Set(cnt_created)
+			cntCountRunning.With(prometheus.Labels{"nodename": hostname}).Set(cnt_running)
+			cntCountExited.With(prometheus.Labels{"nodename": hostname}).Set(cnt_exited)
 
 			time.Sleep(15 * time.Second)
 		}
