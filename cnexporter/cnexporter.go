@@ -1,3 +1,8 @@
+// Package cnexporter exports data about Docker containers as Prometheus gauges.
+//
+// Data extraction is handled with the `ContainerExporter` type.
+// A web server exporting the `/metrics` endpoint is not included but is trivial
+// to implement.
 package cnexporter
 
 import (
@@ -14,6 +19,7 @@ import (
 	"docker-exporter/utils"
 )
 
+// Unifies four Gauge vectors in a single struct for convenience
 type CntCounts struct {
 	Total   *prometheus.GaugeVec
 	Created *prometheus.GaugeVec
@@ -21,6 +27,10 @@ type CntCounts struct {
 	Exited  *prometheus.GaugeVec
 }
 
+// Creates, registeres and updates Prometheus GaugeVecs in goroutines
+//
+// Counts: predefined GaugeVecs for "total", "created", "running" and "exited" container counts.
+// Metadata: always reports 0 but holds container metadata as labels.
 type ContainerExporter struct {
 	Context  context.Context
 	Client   *client.Client
@@ -28,11 +38,13 @@ type ContainerExporter struct {
 	Metadata *prometheus.GaugeVec
 }
 
+// Create and register Prometheus GaugeVecs
 func (self *ContainerExporter) Initialize() {
 	self.initCountGauges()
 	self.initMetadataGauge()
 }
 
+// Update container count metrics in a goroutine every `timeout` seconds
 func (self *ContainerExporter) RecordCounts() {
 	go func() {
 		for {
@@ -54,6 +66,7 @@ func (self *ContainerExporter) RecordCounts() {
 	}()
 }
 
+// Update container metadata metrics in a goroutine every `timeout` seconds
 func (self *ContainerExporter) RecordMetadata() {
 	go func() {
 		for {
@@ -78,6 +91,7 @@ func (self *ContainerExporter) RecordMetadata() {
 	}()
 }
 
+// Initialize the ContainerExporter's Count GaugeVecs
 func (self *ContainerExporter) initCountGauges() {
 	self.Counts.Total = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "migratorius_docker_cnt_counts",
@@ -105,6 +119,7 @@ func (self *ContainerExporter) initCountGauges() {
 	)
 }
 
+// Initialize the ContainerExporter's Metadata GaugeVec
 func (self *ContainerExporter) initMetadataGauge() {
 	self.Metadata = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "migratorius_docker_cnt_metadata",
@@ -114,6 +129,7 @@ func (self *ContainerExporter) initMetadataGauge() {
 	)
 }
 
+// Get a list of existing containers via the Docker SDK
 func (self *ContainerExporter) getContainers() []types.Container {
 	containers, err := self.Client.ContainerList(self.Context, types.ContainerListOptions{All: true})
 	if err != nil {
@@ -122,6 +138,7 @@ func (self *ContainerExporter) getContainers() []types.Container {
 	return containers
 }
 
+// Get the hostname of the current node
 func (self *ContainerExporter) getHostname() string {
 	hostname, err := os.Hostname()
 	if err != nil {
