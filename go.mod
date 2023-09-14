@@ -3,6 +3,7 @@ module docker-exporter
 go 1.18
 
 require (
+	github.com/akamensky/argparse v1.4.0
 	github.com/docker/docker v24.0.6+incompatible
 	github.com/prometheus/client_golang v1.16.0
 )
