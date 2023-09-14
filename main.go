@@ -5,7 +5,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
@@ -13,6 +12,8 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+
+	"docker-exporter/exporter"
 )
 
 var (
@@ -48,34 +49,6 @@ var (
 	)
 )
 
-type CntLabels struct {
-	id 	string
-	image string
-	name string
-	status string
-	state string
-}
-
-func countByStatus(containers []types.Container, state string) int {
-	count := 0
-	for _, cnt := range containers {
-		if cnt.State == state {
-			count++
-		}
-	}
-	return count
-}
-
-func buildLabels(container types.Container) CntLabels {
-	return CntLabels{
-		container.ID,
-		container.Image,
-		strings.Trim(container.Names[0], "/"),
-		container.Status,
-		container.State,
-	}
-}
-
 func recordMetrics(dclient *client.Client, dcontext context.Context) {
 	go func() {
 		for {
@@ -90,19 +63,19 @@ func recordMetrics(dclient *client.Client, dcontext context.Context) {
 			}
 
 			cnt_total := float64(len(containers))
-			cnt_created := float64(countByStatus(containers, "created"))
-			cnt_running := float64(countByStatus(containers, "running"))
-			cnt_exited := float64(countByStatus(containers, "exited"))
+			cnt_created := float64(exporter.CountByStatus(containers, "created"))
+			cnt_running := float64(exporter.CountByStatus(containers, "running"))
+			cnt_exited := float64(exporter.CountByStatus(containers, "exited"))
 
 			cntStats.Reset()
 			for _, cnt := range containers {
-				labels := buildLabels(cnt)
+				labels := exporter.BuildLabels(cnt)
 				cntStats.With(prometheus.Labels{
-					"id":       labels.id,
-					"image":    labels.image,
-					"name":     labels.name,
-					"status":   labels.status,
-					"state":    labels.state,
+					"id":       labels.Id,
+					"image":    labels.Image,
+					"name":     labels.Name,
+					"status":   labels.Status,
+					"state":    labels.State,
 					"nodename": hostname,
 				})
 			}
