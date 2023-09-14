@@ -4,22 +4,15 @@ import (
 	"context"
 	"log"
 	"os"
-	"strings"
 	"time"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/client"
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
-)
 
-type CntLabels struct {
-	Id     string
-	Image  string
-	Name   string
-	Status string
-	State  string
-}
+	"docker-exporter/utils"
+)
 
 type CntCounts struct {
 	Total   *prometheus.GaugeVec
@@ -47,9 +40,9 @@ func (self *ContainerExporter) RecordCounts() {
 			hostname := self.getHostname()
 
 			cnt_total := float64(len(containers))
-			cnt_created := float64(countByStatus(containers, "created"))
-			cnt_running := float64(countByStatus(containers, "running"))
-			cnt_exited := float64(countByStatus(containers, "exited"))
+			cnt_created := float64(utils.CountByStatus(containers, "created"))
+			cnt_running := float64(utils.CountByStatus(containers, "running"))
+			cnt_exited := float64(utils.CountByStatus(containers, "exited"))
 
 			self.Counts.Total.With(prometheus.Labels{"nodename": hostname}).Set(cnt_total)
 			self.Counts.Created.With(prometheus.Labels{"nodename": hostname}).Set(cnt_created)
@@ -69,7 +62,7 @@ func (self *ContainerExporter) RecordMetadata() {
 
 			self.Metadata.Reset()
 			for _, cnt := range containers {
-				labels := buildLabels(cnt)
+				labels := utils.BuildLabels(cnt)
 				self.Metadata.With(prometheus.Labels{
 					"id":       labels.Id,
 					"image":    labels.Image,
@@ -135,24 +128,4 @@ func (self *ContainerExporter) getHostname() string {
 		log.Fatal("Failed to read the hostname")
 	}
 	return hostname
-}
-
-func countByStatus(containers []types.Container, state string) int {
-	count := 0
-	for _, cnt := range containers {
-		if cnt.State == state {
-			count++
-		}
-	}
-	return count
-}
-
-func buildLabels(container types.Container) CntLabels {
-	return CntLabels{
-		container.ID,
-		container.Image,
-		strings.Trim(container.Names[0], "/"),
-		container.Status,
-		container.State,
-	}
 }
