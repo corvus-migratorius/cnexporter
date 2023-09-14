@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"docker-exporter/cnexporter"
+	"docker-exporter/exporter"
 )
 
 func main() {
@@ -37,10 +37,10 @@ func main() {
 	}
 	defer dclient.Close()
 
-	exporter := cnexporter.ContainerExporter(context, dclient, *timeout)
+	cnexporter := exporter.ContainerExporter(context, dclient, *timeout)
 
-	exporter.RecordCounts()
-	exporter.RecordMetadata()
+	cnexporter.RecordCounts()
+	cnexporter.RecordMetadata()
 
 	http.Handle("/metrics", promhttp.Handler())
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%d", *port), nil))
