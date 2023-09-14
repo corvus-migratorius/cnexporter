@@ -7,7 +7,7 @@
 // A web server exporting the `/metrics` endpoint is not included but is trivial
 // to implement.
 
-package cnexporter
+package exporter
 
 import (
 	"context"
