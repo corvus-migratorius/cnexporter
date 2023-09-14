@@ -20,7 +20,10 @@ func main() {
 		Help:    "Port for publishing the Prometheus exporter",
 		Default: 9200,
 	})
-	// timeout := parser.Int("t", "timeout", &argparse.Options{Help: "Timeout for polling Docker API"})
+	timeout := parser.Int("t", "timeout", &argparse.Options{
+		Help:    "Timeout for polling Docker API (seconds)",
+		Default: 15,
+	})
 	// Parse input and display usage on error (equivalent to `--help`)
 	err := parser.Parse(os.Args)
 	if err != nil {
@@ -34,7 +37,7 @@ func main() {
 	}
 	defer dclient.Close()
 
-	exporter := cnexporter.ContainerExporter(context, dclient)
+	exporter := cnexporter.ContainerExporter(context, dclient, *timeout)
 
 	exporter.RecordCounts()
 	exporter.RecordMetadata()

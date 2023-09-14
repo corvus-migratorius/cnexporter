@@ -32,10 +32,11 @@ type CntCounts struct {
 }
 
 // Factory function returning pointers to properly initialized containerExporter instances
-func ContainerExporter(context context.Context, client *client.Client) *containerExporter {
+func ContainerExporter(context context.Context, client *client.Client, timeout int) *containerExporter {
 	exporter := containerExporter{
 		Context: context,
 		Client:  client,
+		Timeout: timeout,
 	}
 
 	exporter.initCountGauges()
@@ -52,6 +53,7 @@ type containerExporter struct {
 	Client   *client.Client
 	Counts   CntCounts
 	Metadata *prometheus.GaugeVec
+	Timeout  int
 }
 
 // Update container count metrics in a goroutine every `timeout` seconds
@@ -71,7 +73,7 @@ func (self *containerExporter) RecordCounts() {
 			self.Counts.Running.With(prometheus.Labels{"nodename": hostname}).Set(cnt_running)
 			self.Counts.Exited.With(prometheus.Labels{"nodename": hostname}).Set(cnt_exited)
 
-			time.Sleep(15 * time.Second)
+			time.Sleep(time.Duration(self.Timeout) * time.Second)
 		}
 	}()
 }
@@ -96,7 +98,7 @@ func (self *containerExporter) RecordMetadata() {
 				})
 			}
 
-			time.Sleep(15 * time.Second)
+			time.Sleep(time.Duration(self.Timeout) * time.Second)
 		}
 	}()
 }
