@@ -12,19 +12,15 @@ import (
 )
 
 func main() {
-	dcontext := context.Background()
+	context := context.Background()
 	dclient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
 		panic(err)
 	}
 	defer dclient.Close()
 
-	exporter := cnexporter.ContainerExporter{
-		Context: dcontext,
-		Client:  dclient,
-	}
+	exporter := cnexporter.ContainerExporter(context, dclient)
 
-	exporter.Initialize()
 	exporter.RecordCounts()
 	exporter.RecordMetadata()
 
