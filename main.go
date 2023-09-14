@@ -10,7 +10,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus/promauto"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"docker-exporter/exporter"
+	"docker-exporter/cnexporter"
 )
 
 func main() {
@@ -28,7 +28,7 @@ func main() {
 		[]string{"id", "image", "name", "status", "state", "nodename"},
 	)
 
-	var cntCounts exporter.CntCounts
+	var cntCounts cnexporter.CntCounts
 	cntCounts.Total = promauto.NewGaugeVec(prometheus.GaugeOpts{
 		Name: "migratorius_docker_cnt_counts",
 		Help: "Number of Docker containers detected on the node",
@@ -53,6 +53,13 @@ func main() {
 	},
 		[]string{"nodename"},
 	)
+
+	exporter := cnexporter.ContainerExporter{
+		Context:  dcontext,
+		Client:   dclient,
+		Metadata: cntMetadata,
+		Counts:   cntCounts,
+	}
 
 	exporter.RecordCounts(cntCounts, dclient, dcontext)
 	exporter.RecordMetadata(cntMetadata, dclient, dcontext)
