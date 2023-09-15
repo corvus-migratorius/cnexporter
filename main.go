@@ -44,7 +44,7 @@ func parseArgs(APPNAME string, VERSION string) (*int, *int) {
 
 func main() {
 	APPNAME := "cnexporter"
-	VERSION := "0.1.0"
+	VERSION := "0.1.1"
 
 	port, timeout := parseArgs(APPNAME, VERSION)
 
