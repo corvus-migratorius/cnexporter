@@ -36,6 +36,10 @@ func parseArgs() (*int, *int) {
 
 func main() {
 	port, timeout := parseArgs()
+
+	log.Printf("Using port %d to publish /metrics\n", *port)
+	log.Printf("Setting Docker API polling timeout to %d seconds\n", *timeout)
+
 	context := context.Background()
 	dclient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
 	if err != nil {
