@@ -14,7 +14,7 @@ import (
 	"docker-exporter/exporter"
 )
 
-func main() {
+func parseArgs() (*int, *int) {
 	parser := argparse.NewParser("cnexporter", "Publishes container metadata as a Prometheus exporter")
 	port := parser.Int("p", "port", &argparse.Options{
 		Help:    "Port for publishing the Prometheus exporter",
@@ -24,11 +24,21 @@ func main() {
 		Help:    "Timeout for polling Docker API (seconds)",
 		Default: 15,
 	})
+
 	// Parse input and display usage on error (equivalent to `--help`)
 	err := parser.Parse(os.Args)
 	if err != nil {
 		fmt.Print(parser.Usage(err))
 	}
+
+	return port, timeout
+}
+
+func main() {
+	port, timeout := parseArgs()
+
+	log.Printf("Using port %d to publish /metrics\n", *port)
+	log.Printf("Setting Docker API polling timeout to %d seconds\n", *timeout)
 
 	context := context.Background()
 	dclient, err := client.NewClientWithOpts(client.FromEnv, client.WithAPIVersionNegotiation())
