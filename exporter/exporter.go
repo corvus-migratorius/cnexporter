@@ -154,7 +154,7 @@ func (self *containerExporter) getContainers() []types.Container {
 func (self *containerExporter) getHostname() string {
 	hostname, err := os.Hostname()
 	if err != nil {
-		log.Fatal("Failed to read the hostname")
+		log.Fatal("Failed to get the hostname from the OS")
 	}
 	return hostname
 }
