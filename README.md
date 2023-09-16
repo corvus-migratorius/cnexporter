@@ -2,7 +2,6 @@
 Prometheus exporter for certain Docker container metadata metrics
 
 [![CodeQL](https://github.com/corvus-migratorius/cnexporter/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/corvus-migratorius/cnexporter/actions/workflows/github-code-scanning/codeql)
-
 [![build](https://github.com/corvus-migratorius/cnexporter/actions/workflows/go.yml/badge.svg)](https://github.com/corvus-migratorius/cnexporter/actions/workflows/go.yml)
 
 `cnexporter` uses Go Docker SDK to poll Docker API for a handful of container data.
@@ -12,24 +11,26 @@ Prometheus exporter for certain Docker container metadata metrics
 
 The exporter publishes several custom metrics via its `/metrics` endpoint:
 
-- `cnexporter_containers_total`: Gauge, number of Docker containers that currently exist on the reporting system
-- `cnexporter_containers_running` Gauge, number of Docker containers with state: `running`
-- `cnexporter_containers_created` Gauge, number of containers with state: `created`
-- `cnexporter_containers_exited` Gauge, number of containers with state: `exited`
+- `cnexporter_containers_total`: Gauge, total number of containers existing on the reporting system;
+- `cnexporter_containers_running` Gauge, number of Docker containers with state `running`;
+- `cnexporter_containers_created` Gauge, number of containers with state `created`;
+- `cnexporter_containers_exited` Gauge, number of containers with state `exited`;
 
 - `cnexporter_containers_metadata` Gauge, always reports 0. This metric contains the following labels:
-- - `id`
-- - `image`: name of the registry image
-- - `name`: name of the container itself
-- - `status`: e.g. `Up 10 days (healthy)` (taken directly from the API)
-- - `state`: `running`, `exited`, etc.
+  - `id`
+  - `image`: name of the registry image
+  - `name`: name of the container itself
+  - `status`: e.g. `Up 10 days (healthy)` (taken directly from the API)
+  - `state`: `running`, `exited`, etc.
   
-Also, all metrics expose the `nodename` label that is set to the reporting system's hostname (from an `os.Hostname()` call). This is done to allow matching with `node_uname_info` metric provided by https://github.com/prometheus/node_exporter and for other people like me who need this way of querying Prometheus.
+Also, all metrics expose the `nodename` label that is set to the reporting system's hostname. This is done to allow matching with `node_uname_info` metric provided by https://github.com/prometheus/node_exporter, and for other people like me who need this way of querying Prometheus per-node.
 
 
 ## Rationale
 
-I was frustrated with https://github.com/google/cadvisor, how convoluted and bloated it is. Also, sadly, https://github.com/prometheus-net/docker_exporter (which provided certain useful container metadata) was decomissioned. So I decided to write a dead-simple and lightweight tool that would give me the specific overview metrics that I need in my work.
+I was frustrated with https://github.com/google/cadvisor, how convoluted and bloated it is (I failed to get some of the simple container metadata from it). Also, sadly, https://github.com/prometheus-net/docker_exporter (which provided certain useful container metadata) was decomissioned.
+
+So I decided to write a dead-simple and lightweight tool that would give me the specific overview metrics that I need in my work.
 
 
 ## Installation
