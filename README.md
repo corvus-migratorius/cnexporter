@@ -3,6 +3,8 @@ Prometheus exporter for certain Docker container metadata metrics
 
 [![CodeQL](https://github.com/corvus-migratorius/cnexporter/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/corvus-migratorius/cnexporter/actions/workflows/github-code-scanning/codeql)
 
+[![build](https://github.com/corvus-migratorius/cnexporter/actions/workflows/go.yml/badge.svg)](https://github.com/corvus-migratorius/cnexporter/actions/workflows/go.yml)
+
 `cnexporter` uses Go Docker SDK to poll Docker API for a handful of container data.
 
 
