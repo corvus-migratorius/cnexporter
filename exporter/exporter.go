@@ -106,25 +106,25 @@ func (self *containerExporter) RecordMetadata() {
 // Initialize the containerExporter's Count GaugeVecs
 func (self *containerExporter) initCountGauges() {
 	self.Counts.Total = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_docker_cnt_counts",
+		Name: "cnexporter_containers_total",
 		Help: "Number of Docker containers detected on the node",
 	},
 		[]string{"nodename"},
 	)
 	self.Counts.Created = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_docker_cnt_created",
+		Name: "cnexporter_containers_created",
 		Help: "Number of Docker containers with status 'created'",
 	},
 		[]string{"nodename"},
 	)
 	self.Counts.Running = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_docker_cnt_running",
+		Name: "cnexporter_containers_running",
 		Help: "Number of Docker containers with status 'running'",
 	},
 		[]string{"nodename"},
 	)
 	self.Counts.Exited = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_docker_cnt_exited",
+		Name: "cnexporter_containers_exited",
 		Help: "Number of Docker containers with status 'exited'",
 	},
 		[]string{"nodename"},
@@ -134,7 +134,7 @@ func (self *containerExporter) initCountGauges() {
 // Initialize the containerExporter's Metadata GaugeVec
 func (self *containerExporter) initMetadataGauge() {
 	self.Metadata = promauto.NewGaugeVec(prometheus.GaugeOpts{
-		Name: "migratorius_docker_cnt_metadata",
+		Name: "cnexporter_containers_metadata",
 		Help: "Container metadata",
 	},
 		[]string{"id", "image", "name", "status", "state", "nodename"},
