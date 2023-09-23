@@ -4,6 +4,7 @@ Prometheus exporter for certain Docker container metadata metrics
 [![CodeQL](https://github.com/corvus-migratorius/cnexporter/actions/workflows/github-code-scanning/codeql/badge.svg)](https://github.com/corvus-migratorius/cnexporter/actions/workflows/github-code-scanning/codeql)
 [![build](https://github.com/corvus-migratorius/cnexporter/actions/workflows/go.yml/badge.svg)](https://github.com/corvus-migratorius/cnexporter/actions/workflows/go.yml)
 [![Github All Releases](https://img.shields.io/github/downloads/corvus-migratorius/cnexporter/total.svg)]()
+[![staticcheck](https://github.com/corvus-migratorius/gorpg/actions/workflows/staticcheck.yaml/badge.svg)](https://github.com/corvus-migratorius/gorpg/actions/workflows/staticcheck.yaml)
 
 `cnexporter` uses Go Docker SDK to poll Docker API for a handful of container data.
 
@@ -29,7 +30,7 @@ Also, all metrics expose the `nodename` label that is set to the reporting syste
 
 ## Rationale
 
-I was frustrated with https://github.com/google/cadvisor, how convoluted and bloated it is (I failed to get some of the simple container metadata from it). Also, sadly, https://github.com/prometheus-net/docker_exporter (which provided certain useful container metadata) was decomissioned.
+I was frustrated with https://github.com/google/cadvisor, how convoluted and bloated it is (I failed to get some of the simple container metadata from it). Also, sadly, https://github.com/prometheus-net/docker_exporter (which provided certain useful container metadata) was decommissioned.
 
 So I decided to write a dead-simple and lightweight tool that would give me the specific overview metrics that I need in my work.
 
@@ -58,6 +59,6 @@ Just run it in whatever persistent way you prefer. If you want to go the `system
 
 As of now, there are but two options that you can set via CLI (aside from `--version`):
 
-`--port`: set a port for publishing the Prometheus exporter metrics (defaul: `9200`);
+`--port`: set a port for publishing the Prometheus exporter metrics (default: `9200`);
 
 `--timeout`: how often the tool will poll Docker API for information, in seconds (default: `15`).

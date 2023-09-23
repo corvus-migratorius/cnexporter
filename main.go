@@ -17,7 +17,7 @@ import (
 func parseArgs(APPNAME string, VERSION string) (*int, *int) {
 	parser := argparse.NewParser(APPNAME, "Publishes container metadata as a Prometheus exporter")
 	port := parser.Int("p", "port", &argparse.Options{
-		Help:    "Port for publishing the Prometheus exporter",
+		Help:    "Port for publishing the Prometheus exporter metrics",
 		Default: 9200,
 	})
 	timeout := parser.Int("t", "timeout", &argparse.Options{
@@ -34,7 +34,7 @@ func parseArgs(APPNAME string, VERSION string) (*int, *int) {
 		fmt.Print(parser.Usage(err))
 	}
 
-	if *version == true {
+	if *version {
 		fmt.Printf("%s: version %s\n", APPNAME, VERSION)
 		os.Exit(0)
 	}
