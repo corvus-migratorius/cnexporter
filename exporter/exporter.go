@@ -1,12 +1,11 @@
-// Package cnexporter exports data about Docker containers as Prometheus gauges.
-//
-// Data extraction is handled with the `containerExporter` type.
-// Use the `ContainerExporter` factory function to get a properly initialized
-// instance of the exporter.
-//
-// A web server exporting the `/metrics` endpoint is not included but is trivial
-// to implement.
+/* Package exporter exports data about Docker containers as Prometheus gauges.
 
+Data extraction is handled with the `containerExporter` type.
+Use the `ContainerExporter` factory function to get a properly initialized
+instance of the exporter.
+
+A web server exporting the `/metrics` endpoint is not included but is trivial
+to implement. */
 package exporter
 
 import (
@@ -23,7 +22,7 @@ import (
 	"docker-exporter/utils"
 )
 
-// Unifies four Gauge vectors in a single struct for convenience
+// CntCounts unifies four Gauge vectors in a single struct for convenience
 type CntCounts struct {
 	Total   *prometheus.GaugeVec
 	Created *prometheus.GaugeVec
@@ -31,7 +30,7 @@ type CntCounts struct {
 	Exited  *prometheus.GaugeVec
 }
 
-// Factory function returning pointers to properly initialized containerExporter instances
+// ContainerExporter is a factory function returning pointers to properly initialized `containerExporter` instances
 func ContainerExporter(context context.Context, client *client.Client, timeout int) *containerExporter {
 	exporter := containerExporter{
 		Context: context,
@@ -44,7 +43,7 @@ func ContainerExporter(context context.Context, client *client.Client, timeout i
 	return &exporter
 }
 
-// Creates, registeres and updates Prometheus GaugeVecs in goroutines
+// Creates, registers and updates Prometheus GaugeVecs in goroutines
 //
 // Counts: predefined GaugeVecs for "total", "created", "running" and "exited" container counts.
 // Metadata: always reports 0 but holds container metadata as labels.
@@ -63,15 +62,15 @@ func (self *containerExporter) RecordCounts() {
 			containers := self.getContainers()
 			hostname := self.getHostname()
 
-			cnt_total := float64(len(containers))
-			cnt_created := float64(utils.CountByStatus(containers, "created"))
-			cnt_running := float64(utils.CountByStatus(containers, "running"))
-			cnt_exited := float64(utils.CountByStatus(containers, "exited"))
+			cntTotal := float64(len(containers))
+			cntCreated := float64(utils.CountByStatus(containers, "created"))
+			cntRunning := float64(utils.CountByStatus(containers, "running"))
+			cntExited := float64(utils.CountByStatus(containers, "exited"))
 
-			self.Counts.Total.With(prometheus.Labels{"nodename": hostname}).Set(cnt_total)
-			self.Counts.Created.With(prometheus.Labels{"nodename": hostname}).Set(cnt_created)
-			self.Counts.Running.With(prometheus.Labels{"nodename": hostname}).Set(cnt_running)
-			self.Counts.Exited.With(prometheus.Labels{"nodename": hostname}).Set(cnt_exited)
+			self.Counts.Total.With(prometheus.Labels{"nodename": hostname}).Set(cntTotal)
+			self.Counts.Created.With(prometheus.Labels{"nodename": hostname}).Set(cntCreated)
+			self.Counts.Running.With(prometheus.Labels{"nodename": hostname}).Set(cntRunning)
+			self.Counts.Exited.With(prometheus.Labels{"nodename": hostname}).Set(cntExited)
 
 			time.Sleep(time.Duration(self.Timeout) * time.Second)
 		}
@@ -89,7 +88,7 @@ func (self *containerExporter) RecordMetadata() {
 			for _, cnt := range containers {
 				labels := utils.BuildLabels(cnt)
 				self.Metadata.With(prometheus.Labels{
-					"id":       labels.Id,
+					"id":       labels.ID,
 					"image":    labels.Image,
 					"name":     labels.Name,
 					"status":   labels.Status,

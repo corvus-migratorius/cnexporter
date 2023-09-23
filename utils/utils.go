@@ -1,3 +1,4 @@
+/* Package utils provides utility functions for the cnexporter project.*/
 package utils
 
 import (
@@ -7,7 +8,7 @@ import (
 )
 
 type CntLabels struct {
-	Id     string
+	ID     string
 	Image  string
 	Name   string
 	Status string
