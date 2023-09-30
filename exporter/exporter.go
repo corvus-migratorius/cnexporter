@@ -19,7 +19,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promauto"
 
-	"docker-exporter/utils"
+	"cnexporter/utils"
 )
 
 // CntCounts unifies four Gauge vectors in a single struct for convenience

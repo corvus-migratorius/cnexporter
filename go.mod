@@ -1,4 +1,4 @@
-module docker-exporter
+module cnexporter
 
 go 1.18
 
