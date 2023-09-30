@@ -11,7 +11,7 @@ import (
 	"github.com/docker/docker/client"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 
-	"docker-exporter/exporter"
+	"cnexporter/exporter"
 )
 
 func parseArgs(APPNAME string, VERSION string) (*int, *int) {
